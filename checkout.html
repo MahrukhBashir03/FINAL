@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Checkout Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Web Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css">
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="title">Checkout</h1>
+        <div class="checkout-summary">
+            <h2>Order Summary</h2>
+            <table class="checkout-table">
+                <thead>
+                    <tr>
+                        <th><b>Product</b></th>
+                        <th><b>Price</b></th>
+                        <th><b>Quantity</b></th>
+                        <th><b>Total</b></th>
+                    </tr>
+                </thead>
+                <tbody id="checkout-items">
+                    <!-- Cart items will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <div class="total-section">
+                <p><b>GRAND TOTAL:</b> <span id="grand-total">PKR 0</span></p>
+            </div>
+            <button id="place-order">Place Order</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const checkoutItemsContainer = document.getElementById("checkout-items");
+            const grandTotalElement = document.getElementById("grand-total");
+            const cartData = JSON.parse(localStorage.getItem("cartData")) || [];
+
+            let grandTotal = 0;
+
+            // Populate checkout table with cart items
+            cartData.forEach(item => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>PKR ${item.price}</td>
+                    <td>${item.quantity}</td>
+                    <td>PKR ${item.price * item.quantity}</td>
+                `;
+                grandTotal += item.price * item.quantity;
+                checkoutItemsContainer.appendChild(row);
+            });
+
+            // Update grand total
+            grandTotalElement.innerText = `PKR ${grandTotal}`;
+
+            // Handle order placement
+            const placeOrderButton = document.getElementById("place-order");
+            placeOrderButton.addEventListener("click", () => {
+                if (cartData.length === 0) {
+                    alert("Your cart is empty! Please add items before placing an order.");
+                } else {
+                    alert("Your order has been placed successfully!");
+                    localStorage.removeItem("cartData"); // Clear the cart
+                    window.location.href = "index.html"; // Redirect to the homepage
+                }
+            });
+        });
+        document.addEventListener("DOMContentLoaded", () => {
+    const checkoutItemsContainer = document.getElementById("checkout-items");
+    const grandTotalElement = document.getElementById("grand-total");
+    let cartData = JSON.parse(localStorage.getItem("cartData")) || [];
+
+    // Function to update grand total
+    const updateGrandTotal = () => {
+        let grandTotal = cartData.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        grandTotalElement.innerText = `PKR ${grandTotal}`;
+    };
+
+    // Function to update the cart display
+    const updateCartDisplay = () => {
+        checkoutItemsContainer.innerHTML = ""; // Clear the table
+        cartData.forEach(item => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td>PKR ${item.price}</td>
+                <td>
+                    <button class="decrease" data-id="${item.id}">-</button>
+                    <input type="number" class="quantity" data-id="${item.id}" value="${item.quantity}" min="1" readonly>
+                    <button class="increase" data-id="${item.id}">+</button>
+                </td>
+                <td>PKR ${item.price * item.quantity}</td>
+            `;
+            checkoutItemsContainer.appendChild(row);
+        });
+        updateGrandTotal();
+        attachEventListeners(); // Reattach event listeners after updating the DOM
+    };
+
+    // Function to update quantity
+    const updateQuantity = (productId, action) => {
+        const item = cartData.find(product => product.id === parseInt(productId));
+        if (item) {
+            if (action === "increase") {
+                item.quantity++;
+            } else if (action === "decrease" && item.quantity > 1) {
+                item.quantity--;
+            }
+            localStorage.setItem("cartData", JSON.stringify(cartData)); // Update localStorage
+            updateCartDisplay(); // Refresh the display
+        }
+    };
+
+    // Attach event listeners
+    const attachEventListeners = () => {
+        document.querySelectorAll(".increase").forEach(button => {
+            button.addEventListener("click", (e) => {
+                const productId = e.target.dataset.id;
+                updateQuantity(productId, "increase");
+            });
+        });
+
+        document.querySelectorAll(".decrease").forEach(button => {
+            button.addEventListener("click", (e) => {
+                const productId = e.target.dataset.id;
+                updateQuantity(productId, "decrease");
+            });
+        });
+    };
+
+    // Populate the checkout table on load
+    updateCartDisplay();
+
+    // Place Order
+    document.getElementById("place-order").addEventListener("click", () => {
+        if (cartData.length === 0) {
+            alert("Your cart is empty! Please add items before placing an order.");
+        } else {
+            alert("Your order has been placed successfully!");
+            localStorage.removeItem("cartData");
+            window.location.href = "index.html";
+        }
+    });
+});
+    </script>
+</body>
+
+</html>
